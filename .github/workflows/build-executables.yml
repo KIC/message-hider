@@ -49,8 +49,40 @@ jobs:
 
       - name: Install dependencies
         run: |
-          sudo apt update
-          sudo apt install ffmpeg
+          if [ "${{ matrix.os }}" == "ubuntu-latest" ]; then
+            sudo apt update
+            sudo apt install ffmpeg
+          elif [ "${{ matrix.os }}" == "windows-latest" ]; then
+            choco install ffmpeg
+          elif [ "${{ matrix.os }}" == "macos-latest" ]; then
+            brew install ffmpeg
+          fi
+          pip install -r requirements.txt
+          pip install pyinstaller
+
+      # However, for Windows and macOS, you need to ensure Chocolatey and Homebrew are installed first.
+      # Here's how you can modify the workflow to include this:
+
+      - name: Install Chocolatey (Windows)
+        if: matrix.os == 'windows-latest'
+        run: |
+          Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
+
+      - name: Install Homebrew (macOS)
+        if: matrix.os == 'macos-latest'
+        run: |
+          /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+      - name: Install dependencies
+        run: |
+          if [ "${{ matrix.os }}" == "ubuntu-latest" ]; then
+            sudo apt update
+            sudo apt install ffmpeg
+          elif [ "${{ matrix.os }}" == "windows-latest" ]; then
+            choco install ffmpeg
+          elif [ "${{ matrix.os }}" == "macos-latest" ]; then
+            brew install ffmpeg
+          fi
           pip install -r requirements.txt
           pip install pyinstaller
 
