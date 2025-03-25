@@ -8,6 +8,7 @@ from encrypt import decrypt_with_key, encrypt_with_key
 from key import (
     extract_key_from_gif_deterministic,
     generate_deterministic_key,
+    generate_key_from_jpeg,
     get_random_string_from_book,
 )
 from seed import generate_secure_random_float, generate_secure_random_integer
@@ -54,8 +55,12 @@ def generate_seed(type: str, lower: float, upper: float):
 def generate_key(seed: str, length: int, pixel_entropy: int, filename: str):
     if filename.endswith(".gif"):
         print(extract_key_from_gif_deterministic(filename, seed, pixel_entropy, length))
+    elif filename.lower().endswith((".jpg", ".jpeg")):
+        print(generate_key_from_jpeg(filename, seed, pixel_entropy, length))
     else:
-        print(generate_deterministic_key(Path(filename).read_text().strip(), seed))
+        print(
+            generate_deterministic_key(Path(filename).read_text().strip(), seed, length)
+        )
 
 
 @crypto.command()

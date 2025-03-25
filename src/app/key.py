@@ -8,7 +8,7 @@ from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 from PIL import Image
 
 
-def extract_key_from_gif_deterministic(gif_path, seed, num_pixels=10, key_length=32):
+def extract_key_from_gif_deterministic(gif_path, seed, num_pixels=100, key_length=32):
     """
     Extracts a deterministic encryption key from a GIF file by selecting
     random pixels of random frames.
@@ -65,6 +65,56 @@ def extract_key_from_gif_deterministic(gif_path, seed, num_pixels=10, key_length
     return key.hex()
 
 
+def generate_key_from_jpeg(
+    jpeg_path, seed, num_pixels: int = 100, length: int = 32
+) -> str:
+    """
+    Generates a 32-byte encryption key from a JPEG file using a deterministic random selection process.
+
+    :param jpeg_path: Path to the JPEG file.
+    :param seed: Seed for the random number generator (ensures determinism).
+    :param num_pixels: Number of pixels to select for key derivation.
+    :return: Derived 32-byte encryption key.
+    """
+    try:
+        img = Image.open(jpeg_path)
+    except Exception as e:
+        raise ValueError(f"Error opening JPEG file: {e}")
+
+    # Ensure it's a valid image
+    if not img.mode == "RGB":
+        img = img.convert("RGB")
+
+    # Initialize random generator with the given seed for determinism
+    random.seed(seed)
+
+    # Collect pixel data from randomly selected pixels
+    pixel_data = bytearray()
+    width, height = img.size
+
+    for _ in range(num_pixels):
+        # Randomly select a pixel
+        x = random.randint(0, width - 1)
+        y = random.randint(0, height - 1)
+
+        # Get the RGB value of the pixel and add it to pixel_data
+        r, g, b = img.getpixel((x, y))
+        pixel_data.extend([r, g, b])
+
+    # Derive a secure encryption key using PBKDF2-HMAC-SHA256
+    salt = hashlib.sha256(pixel_data).digest()[:16]  # Use hash of pixel data as salt
+    kdf = PBKDF2HMAC(
+        algorithm=hashes.SHA256(),
+        length=length,
+        salt=salt,
+        iterations=100000,
+        backend=default_backend(),
+    )
+    key = kdf.derive(pixel_data)
+
+    return key.hex()
+
+
 def get_random_string_from_book(
     seed: int, pages: int, words: int = 250, characters: int = 5, length: int = 42
 ) -> Iterable[tuple[int]]:
@@ -76,7 +126,7 @@ def get_random_string_from_book(
         yield page, word, character
 
 
-def generate_deterministic_key(text: str, seed: int) -> str:
+def generate_deterministic_key(text: str, seed: int, length: int = 32) -> str:
     """
     Generate a deterministic 32-byte encryption key from a given text and seed.
 
@@ -92,6 +142,6 @@ def generate_deterministic_key(text: str, seed: int) -> str:
     ).encode()
 
     # Use PBKDF2-HMAC-SHA256 to derive the key
-    key = hashlib.pbkdf2_hmac("sha256", text.encode(), salt, 100_000, dklen=32)
+    key = hashlib.pbkdf2_hmac("sha256", text.encode(), salt, 100_000, dklen=length)
 
     return key.hex()

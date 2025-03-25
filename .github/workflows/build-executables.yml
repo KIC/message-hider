@@ -78,6 +78,9 @@ jobs:
   release:
     needs: build
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      releases: write
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -107,7 +110,8 @@ jobs:
           RELEASE_NAME: "Release ${{ github.run_number }}"
         with:
           tag_name: "v${{ github.run_number }}"
-          generate_notes: true
+          release_name: "Release ${{ github.run_number }}"
+          body: "Automated release created by GitHub Actions."
 
       - name: Upload release asset (Windows)
         uses: actions/upload-release-asset@v1
