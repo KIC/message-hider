@@ -75,62 +75,63 @@ jobs:
           name: macos-executables
           path: dist/
 
-  release:
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+release:
+  needs: build
+  runs-on: ubuntu-latest
+  steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
 
-      - name: Download artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: windows-executables
-          path: windows-executables
+    - name: Download artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: windows-executables
+        path: windows-executables
 
-      - name: Download artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: linux-executables
-          path: linux-executables
+    - name: Download artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: linux-executables
+        path: linux-executables
 
-      - name: Download artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: macos-executables
-          path: macos-executables
+    - name: Download artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: macos-executables
+        path: macos-executables
 
-      - name: Create release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          RELEASE_NAME: "Release ${{ github.run_number }}"
-        with:
-          generate_notes: true
+    - name: Create release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        RELEASE_NAME: "Release ${{ github.run_number }}"
+      with:
+        tag_name: "v${{ github.run_number }}"
+        generate_notes: true
 
-      - name: Upload release asset (Windows)
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create-release.outputs.upload_url }}
-          asset_path: windows-executables/dist/hider.exe
-          asset_name: hider.exe
+    - name: Upload release asset (Windows)
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create-release.outputs.upload_url }}
+        asset_path: windows-executables/dist/hider.exe
+        asset_name: hider.exe
 
-      - name: Upload release asset (Linux)
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create-release.outputs.upload_url }}
-          asset_path: linux-executables/dist/hider
-          asset_name: hider
+    - name: Upload release asset (Linux)
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create-release.outputs.upload_url }}
+        asset_path: linux-executables/dist/hider
+        asset_name: hider
 
-      - name: Upload release asset (macOS)
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create-release.outputs.upload_url }}
-          asset_path: macos-executables/dist/hider
-          asset_name: hider
+    - name: Upload release asset (macOS)
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create-release.outputs.upload_url }}
+        asset_path: macos-executables/dist/hider
+        asset_name: hider
