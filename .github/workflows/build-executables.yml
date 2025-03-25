@@ -77,7 +77,7 @@ jobs:
 
       - name: Build executable
         run: |
-          pyinstaller src/app/${{ env.MAIN_PY_FILE }} --onefile -n hider
+          pyinstaller src/app/${{ env.MAIN_PY_FILE }} --onefile -n hider --add-data "binaries/:binaries/"
           ls -l dist/  # Verify build output
 
       - name: Upload artifact (Windows)

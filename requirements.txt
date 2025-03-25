@@ -5,10 +5,10 @@ pytest-dotenv
 pre-commit
 # crypto
 pycryptodome
-stegano
 cryptography
 # imageing
 Pillow
+stegobox
 # audio
 pydub
 soundfile

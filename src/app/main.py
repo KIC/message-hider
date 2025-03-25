@@ -16,6 +16,7 @@ from seed import (
     generate_secure_random_integer,
     generate_secure_random_lat_long,
 )
+from utils import run_binary
 
 
 @click.group()
@@ -126,6 +127,11 @@ def hide(out_dir: str, target: str, hide_me: str, filename: str):
 @click.argument("filename", nargs=1)
 def reveil(filename: str):
     print(audio_steganogra.extract_message(filename))
+
+
+@image.command()
+def hide():
+    print(run_binary("jsteg"))
 
 
 if __name__ == "__main__":
