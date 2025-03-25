@@ -1,8 +1,11 @@
 
 # Caches
 __pycache__
+main.spec
 
 # Folders
 /env
 !/.idea/runConfigurations/
 *.cache
+build/
+dist/

@@ -5,6 +5,7 @@ code --install-extension ms-python.python
 code --install-extension ms-python.vscode-pylance
 code --install-extension charliermarsh.ruff
 code --install-extension mikoz.isort-formatter
+code --install-extension github.vscode-github-actions
 
 # Pytest Test Explorer
 code --install-extension ms-toolsai.jupyter

@@ -1,6 +1,7 @@
 ### Usage
 
-1. think of a secret seed which can be any kind of string
+1. think of a secret seed which can be any kind of string or generate one from
+   the provided commands
 1. Optionally: Hide the seed in a file i.e. a flac file
 1. Optionally: create a source text file from a book
 1. Create an encryption key using the proived commands from a gif or text
