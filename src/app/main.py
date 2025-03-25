@@ -58,6 +58,7 @@ def generate_key(seed: str, length: int, pixel_entropy: int, filename: str):
     elif filename.lower().endswith((".jpg", ".jpeg")):
         print(generate_key_from_jpeg(filename, seed, pixel_entropy, length))
     else:
+        print(f"reading {filename} as a text file!")
         print(
             generate_deterministic_key(Path(filename).read_text().strip(), seed, length)
         )
