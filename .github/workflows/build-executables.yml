@@ -3,7 +3,7 @@ name: Test and Build Executables
 on:
   push:
     branches:
-      - master
+      - main
   workflow_dispatch:
 
 jobs:
