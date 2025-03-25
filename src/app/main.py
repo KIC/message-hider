@@ -11,7 +11,11 @@ from key import (
     generate_key_from_jpeg,
     get_random_string_from_book,
 )
-from seed import generate_secure_random_float, generate_secure_random_integer
+from seed import (
+    generate_secure_random_float,
+    generate_secure_random_integer,
+    generate_secure_random_lat_long,
+)
 
 
 @click.group()
@@ -35,7 +39,11 @@ def image():
 
 
 @crypto.command()
-@click.option("-t", "--type", type=click.Choice(["int", "float"], case_sensitive=False))
+@click.option(
+    "-t",
+    "--type",
+    type=click.Choice(["int", "float", "lat-long"], case_sensitive=False),
+)
 @click.option("-l", "--lower", type=int, default=14)
 @click.option("-u", "--upper", type=int, default=100000)
 def generate_seed(type: str, lower: float, upper: float):
@@ -43,8 +51,11 @@ def generate_seed(type: str, lower: float, upper: float):
         print(generate_secure_random_integer(lower, upper))
     elif type == "float":
         print(generate_secure_random_float(lower, upper))
+    elif type == "lat-long":
+        print(generate_secure_random_lat_long())
     else:
-        raise ValueError("Invalid seed type.")
+        print("Invalid type use float as default")
+        print(generate_secure_random_float(lower, upper))
 
 
 @crypto.command()
@@ -103,7 +114,7 @@ def decrypt(key: str, message: str, base: bool):
     "-o", "--out-dir", default="/tmp", type=click.Path(exists=True, file_okay=False)
 )
 @click.option("--hide-me", prompt=True, hide_input=True, envvar="__HIDE_ME__")
-@click.argument("filename", nargs=1)  # -1)
+@click.argument("filename", nargs=1)
 def hide(out_dir: str, target: str, hide_me: str, filename: str):
     print(f"'{hide_me}' '{filename}' '{out_dir}'")
     audio_steganogra.embed_message(
@@ -112,13 +123,9 @@ def hide(out_dir: str, target: str, hide_me: str, filename: str):
 
 
 @audio.command()
-@click.argument("filename", nargs=1)  # -1)
+@click.argument("filename", nargs=1)
 def reveil(filename: str):
     print(audio_steganogra.extract_message(filename))
-
-
-if __name__ == "__main__":
-    cli()
 
 
 if __name__ == "__main__":

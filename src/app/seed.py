@@ -32,3 +32,23 @@ def generate_secure_random_float(lower: float = 14, upper: float = 100000) -> fl
 
     # Scale and shift to the desired range
     return lower + (upper - lower) * random_fraction
+
+
+def generate_secure_random_lat_long():
+    """
+    Generates a random valid latitude and longitude combination using a
+    cryptographically secure random generator.
+
+    :return: A tuple containing latitude and longitude.
+    """
+    # Latitude ranges from -90 to 90
+    latitude = -90 + (
+        secrets.randbelow(180_000_001) / 1_000_000
+    )  # Secure float between -90 and 90
+
+    # Longitude ranges from -180 to 180
+    longitude = -180 + (
+        secrets.randbelow(360_000_001) / 1_000_000
+    )  # Secure float between -180 and 180
+
+    return f"{latitude:.5f}, {longitude:.5f}"
