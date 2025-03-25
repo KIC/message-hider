@@ -1,0 +1,17 @@
+# commons
+click
+pytest
+pytest-dotenv
+pre-commit
+# crypto
+pycryptodome
+stegano
+cryptography
+# imageing
+Pillow
+# audio
+pydub
+soundfile
+# math
+numpy
+scipy

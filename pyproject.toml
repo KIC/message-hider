@@ -1,0 +1,23 @@
+[tool.black]
+line-length = 88  # Set the maximum line length for Black
+target-version = ["py311"]  # Specify the target Python version
+
+[tool.ruff]
+line-length = 88  # Ensure line length matches Black's setting
+target-version = "py311"  # Specify the target Python version
+
+[tool.ruff.lint]
+# Optional: Customize linting rules further if needed
+select = ["E", "F"]  # Enable all relevant linting rules
+extend-ignore = ["E203"]  # Ignore specific Flake8 warning (whitespace before ':')
+extend-select = ["E501"]  # Uncomment to enforce line length checks
+
+[tool.ruff.format]
+quote-style = "double"  # Use double quotes for strings
+indent-style = "space"   # Use spaces for indentation
+skip-magic-trailing-comma = false  # Enforce trailing commas where appropriate
+
+[tool.pytest.ini_options]
+pythonpath = ["src/app", "src/test"]
+env_files = [".env", ".env.ci"]
+testpaths = ["src/test"]

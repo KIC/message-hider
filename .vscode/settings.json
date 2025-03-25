@@ -1,0 +1,45 @@
+{
+    "python.formatting.provider": "none",
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+        "source.organizeImports": "always",
+        "source.fixAll": "always"
+    },
+    "python.linting.enabled": true,
+    "python.linting.pylintEnabled": false,
+    "python.linting.flake8Enabled": false,
+    "ruff.enable": true,
+    "ruff.limt.args": [
+        "--fix"
+    ],
+    "python.testing.pytestEnabled": true,
+    "python.testing.unittestEnabled": false,
+    "python.testing.pytestArgs": [
+        "src/tests",
+        "-v"
+    ],
+    "python.testing.autoTestDiscoverOnSaveEnabled": true,
+    "terminal.integrated.inheritEnv": true,
+    "terminal.integrated.defaultProfile.windows": "Command Prompt",
+    "workbench.iconTheme": "material-icon-theme",
+    // "workbench.colorTheme": "GitHub Dark Default",
+    "editor.tabSize": 4,
+    "editor.detectIndentation": false,
+    "powermode.enabled": true,
+    "powermode.presets": "flames",
+    // Note multiple paths should be colon seperated
+    "python.envFile": "${workspaceFolder}/.env",
+    "terminal.integrated.env.osx": {
+        "PYTHONPATH": "${workspaceFolder}/src"
+    },
+    "terminal.integrated.env.linux": {
+        "PYTHONPATH": "${workspaceFolder}/src"
+    },
+    "terminal.integrated.env.windows": {
+        "PYTHONPATH": "${workspaceFolder}/src"
+    },
+    "python.analysis.extraPaths": [
+        "${workspaceFolder}/src"
+    ],
+    "testExplorer.useNativeTesting": true
+}

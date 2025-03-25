@@ -1,0 +1,4 @@
+# use `git lfs migrate import --fixup --everything` after changing this file
+models/**/* filter=lfs diff=lfs merge=lfs -text
+src/test/_regression_data/** filter=lfs diff=lfs merge=lfs -text
+_training_data/** filter=lfs diff=lfs merge=lfs -text

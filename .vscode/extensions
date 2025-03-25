@@ -1,0 +1,23 @@
+# call `bash extensions` from a terminal to install needed extensions
+
+# Mandatory Python Extensions
+code --install-extension ms-python.python
+code --install-extension ms-python.vscode-pylance
+code --install-extension charliermarsh.ruff
+code --install-extension mikoz.isort-formatter
+
+# Pytest Test Explorer
+code --install-extension ms-toolsai.jupyter
+code --install-extension eamodio.gitlens
+code --install-extension formulahendry.code-runner
+code --install-extension PKief.material-icon-theme
+
+# Optional extensions
+code --install-extension oderwat.indent-rainbow
+code --install-extension hoovercj.vscode-power-mode
+code --install-extension k--kato.intellij-idea-keybindings
+code --install-extension gnramsay.create-python-module
+code --install-extension Codeium.codeium
+
+# Show all installed extensions
+code --list-extensions

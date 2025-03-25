@@ -1,0 +1,8 @@
+
+# Caches
+__pycache__
+
+# Folders
+/env
+!/.idea/runConfigurations/
+*.cache
