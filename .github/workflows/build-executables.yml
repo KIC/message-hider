@@ -130,9 +130,10 @@ jobs:
 
       - name: Verify artifacts
         run: |
-          ls -l windows-executable/
-          ls -l linux-executable/
-          ls -l macos-executable/
+          ls -l *
+          ls -l windows-executable/hider.exe
+          ls -l linux-executable/hider
+          ls -l macos-executable/hider
 
       - name: Create release
         uses: actions/create-release@v1
@@ -145,12 +146,16 @@ jobs:
           release_name: "Release ${{ github.run_number }}"
           body: "Automated release created by GitHub Actions."
 
+      - name: Set upload_url output
+        shell: bash
+        run: echo "UPLOAD_URL=${{ steps.create-release.outputs.upload_url }}" >> $GITHUB_ENV
+
       - name: Upload release asset (Windows)
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          upload_url: ${{ steps.create-release.outputs.upload_url }}
+          upload_url: ${{ env.UPLOAD_URL }}
           asset_path: windows-executable/hider.exe
           asset_name: hider.exe
           asset_content_type: application/octet-stream
@@ -160,17 +165,17 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          upload_url: ${{ steps.create-release.outputs.upload_url }}
+          upload_url: ${{ env.UPLOAD_URL }}
           asset_path: linux-executable/hider
           asset_name: hider
           asset_content_type: application/octet-stream
 
-      - name: Upload release asset (macOS)
+      - name: Upload macOS executable with logging
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          upload_url: ${{ steps.create-release.outputs.upload_url }}
+          upload_url: ${{ env.UPLOAD_URL }}
           asset_path: macos-executable/hider
           asset_name: hider
           asset_content_type: application/octet-stream
