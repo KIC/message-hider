@@ -84,21 +84,21 @@ jobs:
         if: matrix.os == 'windows-latest'
         uses: actions/upload-artifact@v4
         with:
-          name: windows-executables
+          name: windows-executable
           path: dist/hider.exe
 
       - name: Upload artifact (Linux)
         if: matrix.os == 'ubuntu-latest'
         uses: actions/upload-artifact@v4
         with:
-          name: linux-executables
+          name: linux-executable
           path: dist/hider
 
       - name: Upload artifact (macOS)
         if: matrix.os == 'macos-latest'
         uses: actions/upload-artifact@v4
         with:
-          name: macos-executables
+          name: macos-executable
           path: dist/hider
 
   release:
@@ -113,19 +113,19 @@ jobs:
       - name: Download Windows executable
         uses: actions/download-artifact@v4
         with:
-          name: windows-executables
+          name: windows-executable
           path: windows-executable
 
       - name: Download Linux executable
         uses: actions/download-artifact@v4
         with:
-          name: linux-executables
+          name: linux-executable
           path: linux-executable
 
       - name: Download macOS executable
         uses: actions/download-artifact@v4
         with:
-          name: macos-executables
+          name: macos-executable
           path: macos-executable
 
       - name: Verify artifacts
@@ -135,13 +135,42 @@ jobs:
           ls -l macos-executable/
 
       - name: Create release
+        uses: actions/create-release@v1
         id: create-release
-        uses: softprops/action-gh-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_NAME: "Release ${{ github.run_number }}"
         with:
-          tag_name: v${{ github.run_number }}
-          name: Release v${{ github.run_number }}
-          body: Automated release created by GitHub Actions
-          files: |
-            windows-executable/hider.exe
-            linux-executable/hider
-            macos-executable/hider
+          tag_name: "v${{ github.run_number }}"
+          release_name: "Release ${{ github.run_number }}"
+          body: "Automated release created by GitHub Actions."
+
+      - name: Upload release asset (Windows)
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create-release.outputs.upload_url }}
+          asset_path: windows-executable/hider.exe
+          asset_name: hider.exe
+          asset_content_type: application/octet-stream
+
+      - name: Upload release asset (Linux)
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create-release.outputs.upload_url }}
+          asset_path: linux-executable/hider
+          asset_name: hider
+          asset_content_type: application/octet-stream
+
+      - name: Upload release asset (macOS)
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create-release.outputs.upload_url }}
+          asset_path: macos-executable/hider
+          asset_name: hider
+          asset_content_type: application/octet-stream
