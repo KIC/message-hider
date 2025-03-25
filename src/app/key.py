@@ -9,12 +9,13 @@ from PIL import Image
 
 def extract_key_from_gif_deterministic(gif_path, seed, num_pixels=10, key_length=32):
     """
-    Extracts a deterministic encryption key from a GIF file by selecting random pixels of random frames.
+    Extracts a deterministic encryption key from a GIF file by selecting
+    random pixels of random frames.
 
     :param gif_path: Path to the GIF file.
     :param seed: Seed for the random number generator (ensures determinism).
     :param num_pixels: Number of pixels to select for key derivation.
-    :param key_length: Length of the encryption key (default is 32 bytes for AES-256).
+    :param key_length: Length of the encryption key.
     :return: Derived encryption key.
     """
     try:
