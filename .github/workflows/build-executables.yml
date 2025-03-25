@@ -131,6 +131,7 @@ jobs:
       - name: Verify artifacts
         run: |
           ls -l *
+          echo "Explicit ls"
           ls -l windows-executable/hider.exe
           ls -l linux-executable/hider
           ls -l macos-executable/hider
@@ -177,5 +178,5 @@ jobs:
         with:
           upload_url: ${{ env.UPLOAD_URL }}
           asset_path: macos-executable/hider
-          asset_name: hider
+          asset_name: mc-hider
           asset_content_type: application/octet-stream
