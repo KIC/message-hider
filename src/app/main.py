@@ -1,10 +1,15 @@
 import base64
 import os
+from pathlib import Path
 
 import audio_steganogra
 import click
 from encrypt import decrypt_with_key, encrypt_with_key
-from key import extract_key_from_gif_deterministic
+from key import (
+    extract_key_from_gif_deterministic,
+    generate_deterministic_key,
+    get_random_string_from_book,
+)
 from seed import generate_secure_random_float, generate_secure_random_integer
 
 
@@ -47,7 +52,21 @@ def generate_seed(type: str, lower: float, upper: float):
 @click.option("-p", "--pixel-entropy", default=100, type=int)
 @click.argument("filename", nargs=1)
 def generate_key(seed: str, length: int, pixel_entropy: int, filename: str):
-    print(extract_key_from_gif_deterministic(filename, seed, pixel_entropy, length))
+    if filename.endswith(".gif"):
+        print(extract_key_from_gif_deterministic(filename, seed, pixel_entropy, length))
+    else:
+        print(generate_deterministic_key(Path(filename).read_text().strip(), seed))
+
+
+@crypto.command()
+@click.option("-s", "--seed", default="42", type=str)
+@click.option("-p", "--pages", default=120, type=int)
+@click.option("-w", "--words", default=250, type=int)
+@click.option("-c", "--chars", default=5, type=int)
+@click.option("-l", "--length", default=42, type=int)
+def generate_source(seed: str, pages: int, words: int, chars: int, length: int):
+    for t in get_random_string_from_book(seed, pages, words, chars, length):
+        print(t)
 
 
 @crypto.command()
@@ -90,6 +109,10 @@ def hide(out_dir: str, target: str, hide_me: str, filename: str):
 @click.argument("filename", nargs=1)  # -1)
 def reveil(filename: str):
     print(audio_steganogra.extract_message(filename))
+
+
+if __name__ == "__main__":
+    cli()
 
 
 if __name__ == "__main__":

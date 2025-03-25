@@ -1,3 +1,20 @@
+### Usage
+
+1. think of a secret seed which can be any kind of string
+1. Optionally: Hide the seed in a file i.e. a flac file
+1. Optionally: create a source text file from a book
+1. Create an encryption key using the proived commands from a gif or text
+1. Use the generated key to encrypt your secret message
+1. Optionally: Hide the encrypted message in a file i.e. a flac file
+1. distribute the encrypted message/file
+
+Now to restore your message you need to know your seed, regenerate your key
+and decrypt the message. tada! Don't forget to regularly check if you can
+re-generate the key i.e. by using a different test seed
+
+### Maybe i need this later
+
+```python
 ecoys.py
 
 # Required: pip install pycryptodome stegano Pillow
@@ -141,3 +158,4 @@ if **name** == "**main**": # Example usage (5-of-7 scheme with 8 images total)
 
     except RuntimeError as e:
         print(f"Error during decryption: {e}")
+```

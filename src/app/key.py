@@ -1,5 +1,6 @@
 import hashlib
 import random
+from typing import Iterable
 
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes
@@ -60,5 +61,37 @@ def extract_key_from_gif_deterministic(gif_path, seed, num_pixels=10, key_length
     )
     key = kdf.derive(pixel_data)
     gif.close()
+
+    return key.hex()
+
+
+def get_random_string_from_book(
+    seed: int, pages: int, words: int = 250, characters: int = 5, length: int = 42
+) -> Iterable[tuple[int]]:
+    random.seed(seed)
+    for _ in range(length):
+        page = random.randint(1, pages)
+        word = random.randint(1, words)
+        character = random.randint(1, characters)
+        yield page, word, character
+
+
+def generate_deterministic_key(text: str, seed: int) -> str:
+    """
+    Generate a deterministic 32-byte encryption key from a given text and seed.
+
+    :param text: The input text to derive the key from.
+    :param seed: The seed for deterministic randomness.
+    :return: A 32-byte encryption key.
+    """
+    random.seed(seed)
+
+    # Generate a deterministic salt using the seed
+    salt = "".join(
+        random.choices("abcdefghijklmnopqrstuvwxyz0123456789", k=16)
+    ).encode()
+
+    # Use PBKDF2-HMAC-SHA256 to derive the key
+    key = hashlib.pbkdf2_hmac("sha256", text.encode(), salt, 100_000, dklen=32)
 
     return key.hex()
