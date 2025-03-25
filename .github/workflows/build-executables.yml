@@ -141,6 +141,7 @@ jobs:
         with:
           upload_url: ${{ steps.create-release.outputs.upload_url }}
           asset_path: windows-executables/dist/hider.exe
+          asset_content_type: application/octet-stream
           asset_name: hider.exe
 
       - name: Upload release asset (Linux)
@@ -150,6 +151,7 @@ jobs:
         with:
           upload_url: ${{ steps.create-release.outputs.upload_url }}
           asset_path: linux-executables/dist/hider
+          asset_content_type: application/octet-stream
           asset_name: hider
 
       - name: Upload release asset (macOS)
@@ -159,4 +161,5 @@ jobs:
         with:
           upload_url: ${{ steps.create-release.outputs.upload_url }}
           asset_path: macos-executables/dist/hider
+          asset_content_type: application/octet-stream
           asset_name: hider
