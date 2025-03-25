@@ -103,6 +103,7 @@ jobs:
           path: macos-executables
 
       - name: Create release
+        id: create-release
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
