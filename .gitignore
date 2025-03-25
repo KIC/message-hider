@@ -1,7 +1,7 @@
 
 # Caches
 __pycache__
-main.spec
+*.spec
 
 # Folders
 /env
