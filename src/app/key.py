@@ -6,6 +6,7 @@ from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 from PIL import Image
+from pydub import AudioSegment
 
 
 def extract_key_from_gif_deterministic(gif_path, seed, num_pixels=100, key_length=32):
@@ -69,7 +70,8 @@ def generate_key_from_jpeg(
     jpeg_path, seed, num_pixels: int = 100, length: int = 32
 ) -> str:
     """
-    Generates a 32-byte encryption key from a JPEG file using a deterministic random selection process.
+    Generates a 32-byte encryption key from a JPEG file using a deterministic
+    random selection process.
 
     :param jpeg_path: Path to the JPEG file.
     :param seed: Seed for the random number generator (ensures determinism).
@@ -143,5 +145,50 @@ def generate_deterministic_key(text: str, seed: int, length: int = 32) -> str:
 
     # Use PBKDF2-HMAC-SHA256 to derive the key
     key = hashlib.pbkdf2_hmac("sha256", text.encode(), salt, 100_000, dklen=length)
+
+    return key.hex()
+
+
+def generate_key_from_mp3(mp3_path, seed, num_samples=1000, length: int = 32) -> str:
+    """
+    Generates a 32-byte encryption key from an MP3 file using a deterministic random selection process.
+
+    :param mp3_path: Path to the MP3 file.
+    :param seed: Seed for the random number generator (ensures determinism).
+    :param num_samples: Number of audio samples to select for key derivation.
+    :return: Derived 32-byte encryption key.
+    """
+    try:
+        audio = AudioSegment.from_mp3(mp3_path)
+    except Exception as e:
+        raise ValueError(f"Error opening MP3 file: {e}")
+
+    # Convert audio to raw bytes
+    raw_audio = audio.raw_data
+
+    # Initialize random generator with the given seed for determinism
+    random.seed(seed)
+
+    # Collect audio sample data from randomly selected positions
+    sample_data = bytearray()
+    audio_length = len(raw_audio)
+
+    for _ in range(num_samples):
+        # Randomly select a sample position
+        position = random.randint(0, audio_length - 1)
+
+        # Get the byte at the selected position and add it to sample_data
+        sample_data.append(raw_audio[position])
+
+    # Derive a secure encryption key using PBKDF2-HMAC-SHA256
+    salt = hashlib.sha256(sample_data).digest()[:16]  # Use hash of sample data as salt
+    kdf = PBKDF2HMAC(
+        algorithm=hashes.SHA256(),
+        length=length,
+        salt=salt,
+        iterations=100000,
+        backend=default_backend(),
+    )
+    key = kdf.derive(sample_data)
 
     return key.hex()

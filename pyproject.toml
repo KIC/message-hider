@@ -1,3 +1,6 @@
+[pycodestyle]
+max-line-length = 88
+
 [tool.black]
 line-length = 88  # Set the maximum line length for Black
 target-version = ["py311"]  # Specify the target Python version
@@ -5,6 +8,7 @@ target-version = ["py311"]  # Specify the target Python version
 [tool.ruff]
 line-length = 88  # Ensure line length matches Black's setting
 target-version = "py311"  # Specify the target Python version
+
 
 [tool.ruff.lint]
 # Optional: Customize linting rules further if needed

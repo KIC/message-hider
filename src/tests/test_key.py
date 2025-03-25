@@ -3,6 +3,7 @@ from key import (
     extract_key_from_gif_deterministic,
     generate_deterministic_key,
     generate_key_from_jpeg,
+    generate_key_from_mp3,
     get_random_string_from_book,
 )
 
@@ -25,6 +26,17 @@ def test_deterministic_from_jpeg():
         DATA_DIR / file, 42.42
     )
     assert generate_key_from_jpeg(DATA_DIR / file, 42.42) != generate_key_from_jpeg(
+        DATA_DIR / file, 42.41
+    )
+
+
+def test_deterministic_from_mp3():
+    file = "short.mp3"
+    assert len(generate_key_from_mp3(DATA_DIR / file, 12)) == 64
+    assert generate_key_from_mp3(DATA_DIR / file, 42.42) == generate_key_from_mp3(
+        DATA_DIR / file, 42.42
+    )
+    assert generate_key_from_mp3(DATA_DIR / file, 42.42) != generate_key_from_mp3(
         DATA_DIR / file, 42.41
     )
 

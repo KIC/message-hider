@@ -8,6 +8,10 @@
     "python.linting.enabled": true,
     "python.linting.pylintEnabled": false,
     "python.linting.flake8Enabled": false,
+    "flake8.args": [
+        "--max-line-length=88"
+    ],
+    "python.linting.ruffEnabled": true,
     "ruff.enable": true,
     "ruff.limt.args": [
         "--fix"
