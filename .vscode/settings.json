@@ -45,5 +45,8 @@
     "python.analysis.extraPaths": [
         "${workspaceFolder}/src"
     ],
-    "testExplorer.useNativeTesting": true
+    "testExplorer.useNativeTesting": true,
+    "cSpell.words": [
+        "flac"
+    ]
 }

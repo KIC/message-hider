@@ -10,7 +10,10 @@ cryptography
 Pillow
 # audio
 pydub
-soundfile
+mp3stego-lib @ git+https://github.com/KIC/mp3-steganography-lib.git@main
+numba  # needed by mp3stego-lib
+tqdm  # needed by mp3stego-lib
+bitarray  # needed by mp3stego-lib
 # math
 numpy
 scipy

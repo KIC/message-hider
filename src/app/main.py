@@ -26,16 +26,19 @@ def cli():
 
 @cli.group()
 def crypto():
+    """Generate keys and seeds"""
     pass
 
 
 @cli.group()
 def audio():
+    """mp3 steganography WARNING this is very sloooow"""
     pass
 
 
 @cli.group()
 def image():
+    """jpeg steganography"""
     pass
 
 
@@ -116,7 +119,7 @@ def decrypt(key: str, message: str, base: bool):
 )
 @click.option("--hide-me", prompt=True, hide_input=True, envvar="__HIDE_ME__")
 @click.argument("filename", nargs=1)
-def hide_in_flac(out_dir: str, hide_me: str, filename: str):
+def hide_in_mp3(out_dir: str, hide_me: str, filename: str):
     print(f"'*****' '{filename}' '{out_dir}'")
     audio_steganogra.embed_message(
         filename, hide_me, os.path.join(out_dir, os.path.basename(filename))
@@ -125,7 +128,7 @@ def hide_in_flac(out_dir: str, hide_me: str, filename: str):
 
 @audio.command(name="reveil")
 @click.argument("filename", nargs=1)
-def reveil_from_flac(filename: str):
+def reveil_from_mp3(filename: str):
     print(audio_steganogra.extract_message(filename))
 
 
