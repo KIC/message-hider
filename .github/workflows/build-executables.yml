@@ -8,7 +8,7 @@ on:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04 # Use Ubuntu 20.04 to avoid glibc issues
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -21,20 +21,20 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt update
-          sudo apt install ffmpeg
-          pip install -r requirements.txt
-          pip install pytest
+          sudo apt install -y ffmpeg
+          pip install --upgrade -r requirements.txt
+          pip install --upgrade pytest
 
       - name: Run tests
         run: |
-          pytest src/
+          pytest src/ -v
 
   build:
     needs: test
-    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        os: [ubuntu-20.04, windows-latest, macos-latest] # Use ubuntu-20.04 for Linux builds
+    runs-on: ${{ matrix.os }}
     env:
       MAIN_PY_FILE: "main.py"
 
@@ -47,136 +47,140 @@ jobs:
         with:
           python-version: 3.11
 
+      # Install dependencies based on OS
       - name: Install dependencies (Linux)
-        if: matrix.os == 'ubuntu-latest'
+        if: runner.os == 'Linux'
         run: |
           sudo apt update
-          sudo apt install ffmpeg
-          pip install -r requirements.txt
-          pip install pyinstaller
+          sudo apt install -y ffmpeg
+          pip install --upgrade -r requirements.txt
+          pip install --upgrade pyinstaller
 
       - name: Install Chocolatey and dependencies (Windows)
-        if: matrix.os == 'windows-latest'
+        if: runner.os == 'Windows'
         run: |
           Set-ExecutionPolicy Bypass -Scope Process -Force
           [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072
           iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
           choco install ffmpeg -y
-          pip install -r requirements.txt
-          pip install pyinstaller
+          pip install --upgrade -r requirements.txt
+          pip install --upgrade pyinstaller
 
       - name: Install Homebrew and dependencies (macOS)
-        if: matrix.os == 'macos-latest'
+        if: runner.os == 'macOS'
         run: |
           /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
           echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> $HOME/.zprofile
           eval "$(/opt/homebrew/bin/brew shellenv)"
           brew install ffmpeg
-          pip install -r requirements.txt
-          pip install pyinstaller
+          pip install --upgrade -r requirements.txt
+          pip install --upgrade pyinstaller
 
+      # Build the executable using PyInstaller
       - name: Build executable
         run: |
-          pyinstaller src/app/${{ env.MAIN_PY_FILE }} --onefile -n hider --add-data "binaries/:binaries/"
+          pyinstaller src/app/${{ env.MAIN_PY_FILE }} --onefile --name hider --add-data "binaries/:binaries/"
           ls -l dist/  # Verify build output
 
+      # Upload artifacts for each platform
       - name: Upload artifact (Windows)
-        if: matrix.os == 'windows-latest'
-        uses: actions/upload-artifact@v4
+        if: runner.os == 'Windows'
+        uses: actions/upload-artifact@v3
         with:
           name: windows-executable
           path: dist/hider.exe
 
       - name: Upload artifact (Linux)
-        if: matrix.os == 'ubuntu-latest'
-        uses: actions/upload-artifact@v4
+        if: runner.os == 'Linux'
+        uses: actions/upload-artifact@v3
         with:
           name: linux-executable
           path: dist/hider
 
       - name: Upload artifact (macOS)
-        if: matrix.os == 'macos-latest'
-        uses: actions/upload-artifact@v4
+        if: runner.os == 'macOS'
+        uses: actions/upload-artifact@v3
         with:
           name: macos-executable
           path: dist/hider
 
   release:
     needs: build
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04 # Use Ubuntu 20.04 for the release job as well (for consistency)
     permissions:
       contents: write
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
 
-      - name: Download Windows executable
-        uses: actions/download-artifact@v4
-        with:
-          name: windows-executable
-          path: windows-executable
+      steps:
+        - name: Checkout code
+          uses: actions/checkout@v3
 
-      - name: Download Linux executable
-        uses: actions/download-artifact@v4
-        with:
-          name: linux-executable
-          path: linux-executable
+        - name: Download Windows executable
+          uses: actions/download-artifact@v4
+          with:
+            name: windows-executable
+            path: windows-executable
 
-      - name: Download macOS executable
-        uses: actions/download-artifact@v4
-        with:
-          name: macos-executable
-          path: macos-executable
+        - name: Download Linux executable
+          uses: actions/download-artifact@v4
+          with:
+            name: linux-executable
+            path: linux-executable
 
-      - name: Verify artifacts
-        run: |
-          ls -l *
-          echo "Explicit ls"
-          ls -l windows-executable/hider.exe
-          ls -l linux-executable/hider
-          ls -l macos-executable/hider
+        - name: Download macOS executable
+          uses: actions/download-artifact@v4
+          with:
+            name: macos-executable
+            path: macos-executable
 
-      - name: Create release
-        uses: actions/create-release@v1
-        id: create-release
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          RELEASE_NAME: "Release ${{ github.run_number }}"
-        with:
-          tag_name: "v${{ github.run_number }}"
-          release_name: "Release ${{ github.run_number }}"
-          body: "Automated release created by GitHub Actions."
+        - name: Verify artifacts
+          run: |
+            ls -l *
+            echo "Explicit ls"
+            ls -l windows-executable/hider.exe
+            ls -l linux-executable/hider
+            ls -l macos-executable/hider
 
-      - name: Set upload_url output
-        shell: bash
-        run: echo "UPLOAD_URL=${{ steps.create-release.outputs.upload_url }}" >> $GITHUB_ENV
+        - name: Create release
+          uses: actions/create-release@v1
+          id: create-release
+          env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            RELEASE_NAME: "Release ${{ github.run_number }}"
+          with:
+            tag_name: "v${{ github.run_number }}"
+            release_name: "Release ${{ github.run_number }}"
+            body: "Automated release created by GitHub Actions."
 
-      - name: Upload release asset (Windows)
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ env.UPLOAD_URL }}
-          asset_path: windows-executable/hider.exe
-          asset_name: hider.exe
-          asset_content_type: application/octet-stream
+        - name: Set upload_url output
+          shell: bash
+          run: echo "UPLOAD_URL=${{ steps.create-release.outputs.upload_url }}" >> $GITHUB_ENV
 
-      - name: Upload release asset (Linux)
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ env.UPLOAD_URL }}
-          asset_path: linux-executable/hider
-          asset_name: hider
-          asset_content_type: application/octet-stream
+        - name: Upload release asset (Windows)
+          uses: actions/upload-release-asset@v1
+          env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          with:
+            upload_url: ${{ env.UPLOAD_URL }}
+            asset_path: windows-executable/hider.exe
+            asset_name: hider.exe
+            asset_content_type: application/octet-stream
 
-      - name: Upload macOS executable with logging
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ env.UPLOAD_URL }}
-          asset_path: macos-executable/hider
-          asset_name: mc-hider
-          asset_content_type: application/octet-stream
+        - name: Upload release asset (Linux)
+          uses: actions/upload-release-asset@v1
+          env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          with:
+            upload_url: ${{ env.UPLOAD_URL }}
+            asset_path: linux-executable/hider
+            asset_name: hider
+            asset_content_type: application/octet-stream
+
+        - name: Upload macOS executable with logging
+          uses: actions/upload-release-asset@v1
+          env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          with:
+            upload_url: ${{ env.UPLOAD_URL }}
+            asset_path: macos-executable/hider
+            asset_name: mc-hider
+            asset_content_type: application/octet-stream
