@@ -10,7 +10,7 @@ jobs:
   build-and-publish:
     runs-on: ubuntu-latest
     env:
-      IMAGE_NAME: ghcr.io/${{ github.repository_owner }}/my-app
+      IMAGE_NAME: ghcr.io/${{ github.repository_owner }}/message-hider
     steps:
       # Step 1: Checkout code
       - name: Checkout code
