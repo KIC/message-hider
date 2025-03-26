@@ -22,7 +22,7 @@ different test seed.
 
 ### Install
 
-You can download the binary executable for windows (hider.exe), linux (hider)
+You can download the binary executable for windows (hider.exe), unbuntu (hider)
 and macOS (mc-hider). Alternatively you can clone the repo and use your local
 python. However, make sure you have ffmpeg installed if you plan to use audio
-files.
+files. Alternatively there is a docker image on github registry.
