@@ -10,7 +10,7 @@ jobs:
   test:
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        os: [ubuntu-20.04, windows-latest, macos-latest]
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout code
@@ -21,34 +21,36 @@ jobs:
         with:
           python-version: 3.11
 
+      # Install dependencies based on OS
       - name: Install dependencies (Linux)
-        if: matrix.os == 'ubuntu-latest'
+        if: runner.os == 'Linux'
         run: |
           sudo apt update
-          sudo apt install ffmpeg
-          pip install -r requirements.txt
-          pip install pyinstaller
+          sudo apt install ffmpeg -y
+          pip install --upgrade -r requirements.txt
+          pip install --upgrade pyinstaller
 
       - name: Install Chocolatey and dependencies (Windows)
-        if: matrix.os == 'windows-latest'
+        if: runner.os == 'Windows'
         run: |
           Set-ExecutionPolicy Bypass -Scope Process -Force
           [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072
           iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
           choco install ffmpeg -y
-          pip install -r requirements.txt
-          pip install pyinstaller
+          pip install --upgrade -r requirements.txt
+          pip install --upgrade pyinstaller
 
       - name: Install Homebrew and dependencies (macOS)
-        if: matrix.os == 'macos-latest'
+        if: runner.os == 'macOS'
         run: |
           /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
           echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> $HOME/.zprofile
           eval "$(/opt/homebrew/bin/brew shellenv)"
           brew install ffmpeg
-          pip install -r requirements.txt
-          pip install pyinstaller
+          pip install --upgrade -r requirements.txt
+          pip install --upgrade pyinstaller
 
+      # Run tests across all platforms
       - name: Run tests
         run: |
-          pytest src/
+          pytest src/ -v
