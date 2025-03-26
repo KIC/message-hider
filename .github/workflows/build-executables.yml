@@ -110,77 +110,77 @@ jobs:
     permissions:
       contents: write
 
-      steps:
-        - name: Checkout code
-          uses: actions/checkout@v3
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-        - name: Download Windows executable
-          uses: actions/download-artifact@v4
-          with:
-            name: windows-executable
-            path: windows-executable
+      - name: Download Windows executable
+        uses: actions/download-artifact@v4
+        with:
+          name: windows-executable
+          path: windows-executable
 
-        - name: Download Linux executable
-          uses: actions/download-artifact@v4
-          with:
-            name: linux-executable
-            path: linux-executable
+      - name: Download Linux executable
+        uses: actions/download-artifact@v4
+        with:
+          name: linux-executable
+          path: linux-executable
 
-        - name: Download macOS executable
-          uses: actions/download-artifact@v4
-          with:
-            name: macos-executable
-            path: macos-executable
+      - name: Download macOS executable
+        uses: actions/download-artifact@v4
+        with:
+          name: macos-executable
+          path: macos-executable
 
-        - name: Verify artifacts
-          run: |
-            ls -l *
-            echo "Explicit ls"
-            ls -l windows-executable/hider.exe
-            ls -l linux-executable/hider
-            ls -l macos-executable/hider
+      - name: Verify artifacts
+        run: |
+          ls -l *
+          echo "Explicit ls"
+          ls -l windows-executable/hider.exe
+          ls -l linux-executable/hider
+          ls -l macos-executable/hider
 
-        - name: Create release
-          uses: actions/create-release@v1
-          id: create-release
-          env:
-            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-            RELEASE_NAME: "Release ${{ github.run_number }}"
-          with:
-            tag_name: "v${{ github.run_number }}"
-            release_name: "Release ${{ github.run_number }}"
-            body: "Automated release created by GitHub Actions."
+      - name: Create release
+        uses: actions/create-release@v1
+        id: create-release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_NAME: "Release ${{ github.run_number }}"
+        with:
+          tag_name: "v${{ github.run_number }}"
+          release_name: "Release ${{ github.run_number }}"
+          body: "Automated release created by GitHub Actions."
 
-        - name: Set upload_url output
-          shell: bash
-          run: echo "UPLOAD_URL=${{ steps.create-release.outputs.upload_url }}" >> $GITHUB_ENV
+      - name: Set upload_url output
+        shell: bash
+        run: echo "UPLOAD_URL=${{ steps.create-release.outputs.upload_url }}" >> $GITHUB_ENV
 
-        - name: Upload release asset (Windows)
-          uses: actions/upload-release-asset@v1
-          env:
-            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          with:
-            upload_url: ${{ env.UPLOAD_URL }}
-            asset_path: windows-executable/hider.exe
-            asset_name: hider.exe
-            asset_content_type: application/octet-stream
+      - name: Upload release asset (Windows)
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ env.UPLOAD_URL }}
+          asset_path: windows-executable/hider.exe
+          asset_name: hider.exe
+          asset_content_type: application/octet-stream
 
-        - name: Upload release asset (Linux)
-          uses: actions/upload-release-asset@v1
-          env:
-            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          with:
-            upload_url: ${{ env.UPLOAD_URL }}
-            asset_path: linux-executable/hider
-            asset_name: hider
-            asset_content_type: application/octet-stream
+      - name: Upload release asset (Linux)
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ env.UPLOAD_URL }}
+          asset_path: linux-executable/hider
+          asset_name: hider
+          asset_content_type: application/octet-stream
 
-        - name: Upload macOS executable with logging
-          uses: actions/upload-release-asset@v1
-          env:
-            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          with:
-            upload_url: ${{ env.UPLOAD_URL }}
-            asset_path: macos-executable/hider
-            asset_name: mc-hider
-            asset_content_type: application/octet-stream
+      - name: Upload macOS executable with logging
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ env.UPLOAD_URL }}
+          asset_path: macos-executable/hider
+          asset_name: mc-hider
+          asset_content_type: application/octet-stream
