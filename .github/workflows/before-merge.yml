@@ -21,10 +21,33 @@ jobs:
         with:
           python-version: 3.11
 
-      - name: Install dependencies
+      - name: Install dependencies (Linux)
+        if: matrix.os == 'ubuntu-latest'
         run: |
+          sudo apt update
+          sudo apt install ffmpeg
           pip install -r requirements.txt
-          pip install pytest
+          pip install pyinstaller
+
+      - name: Install Chocolatey and dependencies (Windows)
+        if: matrix.os == 'windows-latest'
+        run: |
+          Set-ExecutionPolicy Bypass -Scope Process -Force
+          [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072
+          iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
+          choco install ffmpeg -y
+          pip install -r requirements.txt
+          pip install pyinstaller
+
+      - name: Install Homebrew and dependencies (macOS)
+        if: matrix.os == 'macos-latest'
+        run: |
+          /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+          echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> $HOME/.zprofile
+          eval "$(/opt/homebrew/bin/brew shellenv)"
+          brew install ffmpeg
+          pip install -r requirements.txt
+          pip install pyinstaller
 
       - name: Run tests
         run: |
