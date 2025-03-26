@@ -4,6 +4,7 @@ from pathlib import Path
 
 import audio_steganogra
 import click
+import image_steganogra
 from encrypt import decrypt_with_key, encrypt_with_key
 from key import (
     extract_key_from_gif_deterministic,
@@ -16,7 +17,6 @@ from seed import (
     generate_secure_random_integer,
     generate_secure_random_lat_long,
 )
-from utils import run_binary
 
 
 @click.group()
@@ -110,28 +110,44 @@ def decrypt(key: str, message: str, base: bool):
     print(decrypt_with_key(message, key))
 
 
-@audio.command()
+@audio.command(name="hide")
 @click.option(
     "-o", "--out-dir", default="/tmp", type=click.Path(exists=True, file_okay=False)
 )
 @click.option("--hide-me", prompt=True, hide_input=True, envvar="__HIDE_ME__")
 @click.argument("filename", nargs=1)
-def hide(out_dir: str, target: str, hide_me: str, filename: str):
-    print(f"'{hide_me}' '{filename}' '{out_dir}'")
+def hide_in_flac(out_dir: str, hide_me: str, filename: str):
+    print(f"'*****' '{filename}' '{out_dir}'")
     audio_steganogra.embed_message(
         filename, hide_me, os.path.join(out_dir, os.path.basename(filename))
     )
 
 
-@audio.command()
+@audio.command(name="reveil")
 @click.argument("filename", nargs=1)
-def reveil(filename: str):
+def reveil_from_flac(filename: str):
     print(audio_steganogra.extract_message(filename))
 
 
-@image.command()
-def hide():
-    print(run_binary("jsteg"))
+@image.command(name="hide")
+@click.option(
+    "-o", "--out-dir", default="/tmp", type=click.Path(exists=True, file_okay=False)
+)
+@click.option("--hide-me", prompt=True, hide_input=True, envvar="__HIDE_ME__")
+@click.argument("filename", nargs=1)
+def hide_in_jpg(out_dir: str, hide_me: str, filename: str):
+    print(f"'*****' '{filename}' '{out_dir}'")
+    print(
+        image_steganogra.embed_message(
+            filename, hide_me, os.path.join(out_dir, os.path.basename(filename))
+        )
+    )
+
+
+@image.command(name="reveil")
+@click.argument("filename", nargs=1)
+def reveil_from_jpg(filename: str):
+    print(image_steganogra.extract_message(filename))
 
 
 if __name__ == "__main__":
