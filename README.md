@@ -9,7 +9,7 @@ or video.
    the provided commands
 1. Optionally: Hide the seed in a file i.e. a flac file
 1. Optionally: create a source text file from a book
-1. Create an encryption key using the proived commands from a gif or text or
+1. Create an encryption key using the provided commands from a gif or text or
    use any other 32bytes key you already have (in hex -> 64 Characters)
 1. Use the generated key to encrypt your secret message
 1. Hide the encrypted message in a file i.e. a flac file
@@ -22,7 +22,9 @@ different test seed.
 
 ### Install
 
-You can download the binary executable for windows (hider.exe), unbuntu (hider)
-and macOS (mc-hider). Alternatively you can clone the repo and use your local
-python. However, make sure you have ffmpeg installed if you plan to use audio
-files. Alternatively there is a docker image on github registry.
+You can download the binary executable for windows (hider.exe), ubuntu (hider)
+and macOS (mc-hider). Alternatively there is a docker image on github registry.
+Of course you can clone the repo and use your local python.
+
+In any case, make sure you have ffmpeg installed if you plan to use audio
+files.
