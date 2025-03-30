@@ -21,6 +21,11 @@ from seed import (
 
 @click.group()
 def cli():
+    """
+    Hider! Small utility to encrypt a message and hide it in a file like an
+    audio, image or video.
+    """
+
     pass
 
 
