@@ -6,6 +6,7 @@ import audio_steganogra
 import click
 import image_steganogra
 from encrypt import decrypt_with_key, encrypt_with_key
+from encryption_by_text import gen_key_for_pdf
 from key import (
     extract_key_from_gif_deterministic,
     generate_deterministic_key,
@@ -44,6 +45,12 @@ def audio():
 @cli.group()
 def image():
     """jpeg steganography"""
+    pass
+
+
+@cli.group()
+def text():
+    """generate key for secret from text and text steganography"""
     pass
 
 
@@ -156,6 +163,14 @@ def hide_in_jpg(out_dir: str, hide_me: str, filename: str):
 @click.argument("filename", nargs=1)
 def reveil_from_jpg(filename: str):
     print(image_steganogra.extract_message(filename))
+
+
+@text.command(name="gen-key")
+@click.option("--secret", prompt=True, hide_input=True, envvar="__SECRET__")
+@click.argument("filename", nargs=1)
+def generate_key_from_text(secret: str, filename: str):
+    for key in gen_key_for_pdf(secret, filename):
+        print(key)
 
 
 if __name__ == "__main__":
