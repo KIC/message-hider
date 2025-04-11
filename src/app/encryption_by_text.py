@@ -4,6 +4,14 @@ from typing import Iterator
 
 import fitz
 
+# TODO:
+#  add text staganbography i.e.
+#
+# - very fancy ML based steganography https://github.com/mickeysjm/StegaText/blob/master/run_single_end2end.py
+# - whitespace stego based on java https://darkside.com.au/snow/
+# - using typos as stego based on nodejs https://github.com/mjethani/typo
+#
+
 
 def get_text(file: str) -> list[list[list[str]]]:
     def extract_text(page: fitz.Page, num: int) -> list[str]:
