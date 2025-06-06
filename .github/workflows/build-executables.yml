@@ -8,7 +8,7 @@ on:
 
 jobs:
   test:
-    runs-on: ubuntu-20.04 # Use Ubuntu 20.04 to avoid glibc issues
+    runs-on: ubuntu-24.04 # Use Ubuntu 24.04 to avoid glibc issues
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -33,7 +33,7 @@ jobs:
     needs: test
     strategy:
       matrix:
-        os: [ubuntu-20.04, windows-latest, macos-latest] # Use ubuntu-20.04 for Linux builds
+        os: [ubuntu-24.04, windows-latest, macos-latest] # Use ubuntu-24.04 for Linux builds
     runs-on: ${{ matrix.os }}
     env:
       MAIN_PY_FILE: "main.py"
@@ -106,7 +106,7 @@ jobs:
 
   release:
     needs: build
-    runs-on: ubuntu-20.04 # Use Ubuntu 20.04 for the release job as well (for consistency)
+    runs-on: ubuntu-24.04 # Use Ubuntu 24.04 for the release job as well (for consistency)
     permissions:
       contents: write
 
