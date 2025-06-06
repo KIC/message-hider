@@ -119,7 +119,7 @@ def generate_key_from_jpeg(
 
 def get_random_string_from_book(
     seed: int, pages: int, words: int = 250, characters: int = 5, length: int = 42
-) -> Iterable[tuple[int]]:
+) -> Iterable[tuple[int, int, int]]:
     random.seed(seed)
     for _ in range(length):
         page = random.randint(1, pages)
