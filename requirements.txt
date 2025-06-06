@@ -17,3 +17,5 @@ bitarray  # needed by mp3stego-lib
 # math
 numpy
 scipy
+# text and pdf
+PyMuPDF

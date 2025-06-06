@@ -6,6 +6,7 @@ import audio_steganogra
 import click
 import image_steganogra
 from encrypt import decrypt_with_key, encrypt_with_key
+from encryption_by_text import gen_key_for_pdf
 from key import (
     extract_key_from_gif_deterministic,
     generate_deterministic_key,
@@ -17,10 +18,16 @@ from seed import (
     generate_secure_random_integer,
     generate_secure_random_lat_long,
 )
+from word_substitution import create_key, recover_word
 
 
 @click.group()
 def cli():
+    """
+    Hider! Small utility to encrypt a message and hide it in a file like an
+    audio, image or video.
+    """
+
     pass
 
 
@@ -39,6 +46,12 @@ def audio():
 @cli.group()
 def image():
     """jpeg steganography"""
+    pass
+
+
+@cli.group()
+def text():
+    """generate key for secret from text and text steganography"""
     pass
 
 
@@ -80,12 +93,12 @@ def generate_key(seed: str, length: int, pixel_entropy: int, filename: str):
 
 
 @crypto.command()
-@click.option("-s", "--seed", default="42", type=str)
+@click.option("-s", "--seed", default=42, type=int)
 @click.option("-p", "--pages", default=120, type=int)
 @click.option("-w", "--words", default=250, type=int)
 @click.option("-c", "--chars", default=5, type=int)
 @click.option("-l", "--length", default=42, type=int)
-def generate_source(seed: str, pages: int, words: int, chars: int, length: int):
+def generate_source(seed: int, pages: int, words: int, chars: int, length: int):
     for t in get_random_string_from_book(seed, pages, words, chars, length):
         print(t)
 
@@ -97,7 +110,7 @@ def generate_source(seed: str, pages: int, words: int, chars: int, length: int):
 def encrypt(key: str, message: str, base: bool):
     message = encrypt_with_key(message, key)
     if base:
-        message = base64.b64encode(message)
+        message = base64.b64encode(message.encode("utf-8")).decode("utf-8")
 
     print(message)
 
@@ -108,9 +121,9 @@ def encrypt(key: str, message: str, base: bool):
 @click.option("-m", "--message", prompt=True, hide_input=True)
 def decrypt(key: str, message: str, base: bool):
     if base:
-        message = base64.b64decode(message)
+        message = base64.b64decode(message.encode("utf-8")).decode("utf-8")
 
-    print(decrypt_with_key(message, key))
+    print(decrypt_with_key(message.encode("utf-8"), key.encode("utf-8")))
 
 
 @audio.command(name="hide")
@@ -151,6 +164,28 @@ def hide_in_jpg(out_dir: str, hide_me: str, filename: str):
 @click.argument("filename", nargs=1)
 def reveil_from_jpg(filename: str):
     print(image_steganogra.extract_message(filename))
+
+
+@text.command(name="gen-key")
+@click.option("--secret", prompt=True, hide_input=True, envvar="__SECRET__")
+@click.argument("filename", nargs=1)
+def generate_key_from_text(secret: str, filename: str):
+    for key in gen_key_for_pdf(secret, filename):
+        print(key)
+
+
+@text.command(name="gen-substitution-key")
+@click.option("--secret", prompt=True, hide_input=True, envvar="__SECRET__")
+@click.argument("public-key", nargs=1)
+def generate_key_for_text_substitution(secret: str, public_key: str):
+    print(create_key(public_key, secret))
+
+
+@text.command(name="reveil-substitution")
+@click.option("--key", prompt=True, hide_input=True)
+@click.argument("public-key", nargs=1)
+def reveil_text_substitution(key: str, public_key: str):
+    print(recover_word(public_key, key))
 
 
 if __name__ == "__main__":
