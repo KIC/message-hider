@@ -71,35 +71,19 @@ jobs:
                   url: https://ffmpeg.org/releases/ffmpeg-6.1.tar.xz
                   sha256: 488c76e57dd9b3bee901f71d5c95eaf1db4a5a31fe46a28654e837144207c270
 
-            - name: wheel
-              buildsystem: simple
-              build-commands:
-                - pip3 install --prefix=/app wheel
-
-            - name: setuptools
-              buildsystem: simple
-              build-commands:
-                - pip3 install --prefix=/app setuptools wheel
-
-            - name: python-deps
-              buildsystem: simple
-              build-commands:
-                - pip3 install --prefix=/app --no-deps .
+            - name: hider
+              buildsystem: pip
               sources:
                 - type: dir
-                  path: .
-
-            - name: hider
-              buildsystem: simple
+                  path: src/app
+                - type: file
+                  path: requirements.txt
+                - type: dir
+                  path: binaries
               build-commands:
                 - install -Dm755 main.py /app/bin/hider
                 - mkdir -p /app/binaries
                 - cp -r binaries/* /app/binaries/
-              sources:
-                - type: dir
-                  path: src/app
-                - type: dir
-                  path: binaries
           EOL
 
       - name: Build Flatpak package
