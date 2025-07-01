@@ -86,6 +86,52 @@ jobs:
           pyinstaller src/app/${{ env.MAIN_PY_FILE }} --onefile --name hider --add-data "binaries/:binaries/"
           ls -l dist/  # Verify build output
 
+      - name: Build Flatpak bundle (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          cat > hider-flatpak.yml << 'EOL'
+          app-id: org.hider.Hider
+          runtime: org.freedesktop.Platform
+          runtime-version: '23.08'
+          sdk: org.freedesktop.Sdk
+          command: hider
+          finish-args:
+            - --share=ipc
+            - --filesystem=home
+          modules:
+            - name: ffmpeg
+              cleanup:
+                - /include
+                - /lib/pkgconfig
+                - /share/ffmpeg/examples
+              sources:
+                - type: archive
+                  url: https://ffmpeg.org/releases/ffmpeg-6.1.tar.xz
+                  sha256: 488c76e57dd9b3bee901f71d5c95eaf1db4a5a31fe46a28654e837144207c270
+            - name: hider-bin
+              buildsystem: simple
+              build-commands:
+                - install -Dm755 dist/hider /app/bin/hider
+                - mkdir -p /app/binaries
+                - cp -r binaries/* /app/binaries/
+              sources:
+                - type: file
+                  path: dist/hider
+                - type: dir
+                  path: binaries
+          EOL
+          flatpak install -y --noninteractive flathub org.freedesktop.Platform//23.08 org.freedesktop.Sdk//23.08
+          flatpak-builder --force-clean --repo=repo build-dir hider-flatpak.yml
+          flatpak build-bundle repo hider.flatpak org.hider.Hider
+          ls -l hider.flatpak
+
+      - name: Upload Flatpak bundle (Linux)
+        if: runner.os == 'Linux'
+        uses: actions/upload-artifact@v4
+        with:
+          name: flatpak-bundle
+          path: hider.flatpak
+
       # Upload artifacts for each platform
       - name: Upload artifact (Windows)
         if: runner.os == 'Windows'
