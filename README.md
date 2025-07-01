@@ -22,9 +22,10 @@ different test seed.
 
 ### Install
 
-You can download the binary executable for windows (hider.exe), ubuntu (hider)
-and macOS (mc-hider). Alternatively there is a docker image on github registry.
-Of course you can clone the repo and use your local python.
+You can download the binary executable for windows (hider.exe), linux (hider)
+requires GLIBC >=2.38 and macOS (mc-hider). Alternatively there is a docker
+image on github registry and a flatpack app. Of course you can clone the repo
+and use your local python.
 
 In any case, make sure you have ffmpeg installed if you plan to use audio
 files.

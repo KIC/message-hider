@@ -69,7 +69,7 @@ jobs:
               sources:
                 - type: archive
                   url: https://ffmpeg.org/releases/ffmpeg-6.1.tar.xz
-                  sha256: 488c76e57dd9b3bee76a5a608453d558f76f5057f72e4f3534dd035d164e2316
+                  sha256: 488c76e57dd9b3bee901f71d5c95eaf1db4a5a31fe46a28654e837144207c270
 
             - name: python-deps
               buildsystem: simple
