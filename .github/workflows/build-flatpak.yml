@@ -45,6 +45,10 @@ jobs:
         run: |
           flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
 
+      - name: Install Flatpak SDK and runtime
+        run: |
+          flatpak install -y --noninteractive flathub org.freedesktop.Platform//23.08 org.freedesktop.Sdk//23.08
+
       - name: Create Flatpak manifest
         run: |
           cat > org.hider.Hider.yml << 'EOL'
