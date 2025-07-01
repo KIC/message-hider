@@ -28,3 +28,17 @@ Of course you can clone the repo and use your local python.
 
 In any case, make sure you have ffmpeg installed if you plan to use audio
 files.
+
+#### Flatpak (Linux)
+
+You can install the Flatpak bundle from the GitHub release page:
+
+1. Download `hider.flatpak` from the [GitHub Releases](https://github.com/KIC/message-hider/releases) page.
+2. Install it with:
+   ```bash
+   flatpak install --user --bundle hider.flatpak
+   ```
+3. Run the app with:
+   ```bash
+   flatpak run org.hider.Hider
+   ```
