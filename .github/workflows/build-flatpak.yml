@@ -12,6 +12,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+        with:
+          submodules: recursive
 
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -80,6 +82,8 @@ jobs:
                   path: requirements.txt
                 - type: dir
                   path: binaries
+                - type: dir
+                  path: external/mp3-steganography-lib
               build-commands:
                 - pip3 install --prefix=/app -r requirements.txt
                 - install -Dm755 main.py /app/bin/hider

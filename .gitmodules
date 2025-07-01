@@ -1,0 +1,3 @@
+[submodule "external/mp3-steganography-lib"]
+	path = external/mp3-steganography-lib
+	url = https://github.com/KIC/mp3-steganography-lib.git
