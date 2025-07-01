@@ -10,7 +10,7 @@ cryptography
 Pillow
 # audio
 pydub
-./external/mp3-steganography-lib
+-e ./external/mp3-steganography-lib
 numba  # needed by mp3stego-lib
 tqdm  # needed by mp3stego-lib
 bitarray  # needed by mp3stego-lib
