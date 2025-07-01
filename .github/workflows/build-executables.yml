@@ -56,7 +56,8 @@ jobs:
         if: runner.os == 'Linux'
         run: |
           sudo apt update
-          sudo apt install -y ffmpeg
+          sudo apt install -y ffmpeg flatpak
+          sudo flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
           pip install --upgrade -r requirements.txt
           pip install --upgrade pyinstaller
 
@@ -80,13 +81,6 @@ jobs:
           pip install --upgrade -r requirements.txt
           pip install --upgrade pyinstaller
 
-      - name: Install Flatpak (Linux)
-        if: runner.os == 'Linux'
-        run: |
-          sudo apt update
-          sudo apt install -y flatpak
-          sudo flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
-
       # Build the executable using PyInstaller
       - name: Build executable
         run: |
@@ -96,6 +90,9 @@ jobs:
       - name: Build Flatpak bundle (Linux)
         if: runner.os == 'Linux'
         run: |
+          mkdir -p ~/.local/share/flatpak/repo
+          flatpak remote-add --user --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+          flatpak remote-list --user
           cat > hider-flatpak.yml << 'EOL'
           app-id: org.hider.Hider
           runtime: org.freedesktop.Platform
