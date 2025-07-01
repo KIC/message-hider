@@ -93,6 +93,7 @@ jobs:
           flatpak remote-add --user --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
           flatpak remote-list --user
           cp dist/hider .
+          cp -r binaries . || true
           cat > hider-flatpak.yml << 'EOL'
           app-id: org.hider.Hider
           runtime: org.freedesktop.Platform
