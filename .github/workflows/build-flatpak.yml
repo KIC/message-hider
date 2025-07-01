@@ -72,7 +72,7 @@ jobs:
                   sha256: 488c76e57dd9b3bee901f71d5c95eaf1db4a5a31fe46a28654e837144207c270
 
             - name: hider
-              buildsystem: pip
+              buildsystem: simple
               sources:
                 - type: dir
                   path: src/app
@@ -81,6 +81,7 @@ jobs:
                 - type: dir
                   path: binaries
               build-commands:
+                - pip3 install --prefix=/app -r requirements.txt
                 - install -Dm755 main.py /app/bin/hider
                 - mkdir -p /app/binaries
                 - cp -r binaries/* /app/binaries/
