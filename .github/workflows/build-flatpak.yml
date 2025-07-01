@@ -62,6 +62,7 @@ jobs:
           finish-args:
             - --share=ipc
             - --filesystem=home
+            - --share=network
           modules:
             - name: ffmpeg
               cleanup:
