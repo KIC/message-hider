@@ -115,12 +115,12 @@ jobs:
             - name: hider-bin
               buildsystem: simple
               build-commands:
-                - install -Dm755 dist/hider /app/bin/hider
+                - install -Dm755 hider /app/bin/hider
                 - mkdir -p /app/binaries
                 - cp -r binaries/* /app/binaries/
               sources:
                 - type: file
-                  path: dist/hider
+                  path: hider
                 - type: dir
                   path: binaries
           EOL
