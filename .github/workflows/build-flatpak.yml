@@ -1,0 +1,124 @@
+name: Build Flatpak
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.11
+
+      - name: Install dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y ffmpeg
+          pip install --upgrade -r requirements.txt
+          pip install --upgrade pytest
+
+      - name: Run tests
+        run: |
+          pytest src/ -v
+
+  flatpak:
+    needs: test
+    runs-on: ubuntu-latest
+    container:
+      image: bilelmoussaoui/flatpak-github-actions:kde-6.5
+      options: --privileged
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      - name: Set up Flatpak environment
+        run: |
+          flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+
+      - name: Create Flatpak manifest
+        run: |
+          cat > org.hider.Hider.yml << 'EOL'
+          app-id: org.hider.Hider
+          runtime: org.freedesktop.Platform
+          runtime-version: '23.08'
+          sdk: org.freedesktop.Sdk
+          command: hider
+          finish-args:
+            - --share=ipc
+            - --filesystem=home
+          modules:
+            - name: ffmpeg
+              cleanup:
+                - /include
+                - /lib/pkgconfig
+                - /share/ffmpeg/examples
+              sources:
+                - type: archive
+                  url: https://ffmpeg.org/releases/ffmpeg-6.1.tar.xz
+                  sha256: 488c76e57dd9b3bee76a5a608453d558f76f5057f72e4f3534dd035d164e2316
+
+            - name: python-deps
+              buildsystem: simple
+              build-commands:
+                - pip3 install --prefix=/app --no-deps .
+              sources:
+                - type: dir
+                  path: .
+
+            - name: hider
+              buildsystem: simple
+              build-commands:
+                - install -Dm755 main.py /app/bin/hider
+                - mkdir -p /app/binaries
+                - cp -r binaries/* /app/binaries/
+              sources:
+                - type: dir
+                  path: src/app
+                - type: dir
+                  path: binaries
+          EOL
+
+      - name: Build Flatpak package
+        run: |
+          flatpak-builder --force-clean --repo=repo build-dir org.hider.Hider.yml
+          flatpak build-bundle repo hider.flatpak org.hider.Hider
+
+      - name: Upload Flatpak bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: flatpak-bundle
+          path: hider.flatpak
+
+      - name: Create Release
+        if: github.ref == 'refs/heads/main'
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: flatpak-v${{ github.run_number }}
+          release_name: Flatpak Release ${{ github.run_number }}
+          body: "Automated Flatpak release created by GitHub Actions."
+          draft: false
+          prerelease: false
+
+      - name: Upload to release
+        if: github.ref == 'refs/heads/main'
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: hider.flatpak
+          asset_name: hider.flatpak
+          asset_content_type: application/x-flatpak
