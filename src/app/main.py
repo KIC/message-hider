@@ -149,13 +149,13 @@ def reveil_from_mp3(filename: str):
 @click.option(
     "-o", "--out-dir", default="/tmp", type=click.Path(exists=True, file_okay=False)
 )
-@click.option("--hide-me", prompt=True, hide_input=True, envvar="__HIDE_ME__")
+@click.option("--secret", prompt=True, hide_input=True, envvar="__SECRET__")
 @click.argument("filename", nargs=1)
-def hide_in_jpg(out_dir: str, hide_me: str, filename: str):
+def hide_in_jpg(out_dir: str, secret: str, filename: str):
     print(f"'*****' '{filename}' '{out_dir}'")
     print(
         image_steganogra.embed_message(
-            filename, hide_me, os.path.join(out_dir, os.path.basename(filename))
+            filename, secret, os.path.join(out_dir, os.path.basename(filename))
         )
     )
 

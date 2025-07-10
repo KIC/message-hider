@@ -1,0 +1,7 @@
+pytest
+pytest-dotenv
+pre-commit
+pyinstaller
+
+--requirement requirements.txt
+

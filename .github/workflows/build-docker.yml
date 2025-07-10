@@ -42,5 +42,5 @@ jobs:
           file: ./Dockerfile # Path to your Dockerfile
           push: true
           tags: |
-            ghcr.io/${{ env.OWNER_LC }}/my-app:latest
-            ghcr.io/${{ env.OWNER_LC }}/my-app:${{ github.run_number }}
+            ghcr.io/${{ env.OWNER_LC }}/hider:latest
+            ghcr.io/${{ env.OWNER_LC }}/hider:${{ github.run_number }}
