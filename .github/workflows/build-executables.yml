@@ -40,8 +40,6 @@ jobs:
           iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
           choco install ffmpeg -y
 
-          python -m venv .venv
-          .\.venv\Scripts\activate
           pip install --upgrade -r requirements.txt
           pip install --upgrade pyinstaller
       - name: Install dependencies (macOS)
@@ -52,13 +50,12 @@ jobs:
           eval "$(/opt/homebrew/bin/brew shellenv)"
           brew install ffmpeg
 
-          python3 -m venv .venv
-          . .venv/bin/activate
           pip install --upgrade -r requirements.txt
           pip install --upgrade pyinstaller
       - name: Build (Linux)
         if: matrix.os == 'linux'
         run: |
+          . .venv/bin/activate
           pyinstaller src/app/${{ env.MAIN_PY_FILE }} --onefile --name hider --add-data "binaries/:binaries/"
           # smoke test
           ./dist/hider audio hide --secret "geheimnins" -o /tmp/ src/tests/data/short.mp3 
