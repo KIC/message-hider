@@ -73,6 +73,7 @@ jobs:
       # Build the executable using PyInstaller
       - name: Build executable
         run: |
+          echo "Building executable for ${{ matrix.os }}"
           pyinstaller src/app/${{ env.MAIN_PY_FILE }} --onefile --name hider --add-data "binaries/:binaries/"
 
           # smoke test
