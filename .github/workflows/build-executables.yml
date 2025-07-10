@@ -14,6 +14,10 @@ jobs:
     env:
       MAIN_PY_FILE: "main.py"
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
       - name: Install dependencies (Linux)
         if: matrix.os == 'linux'
         run: |
@@ -50,10 +54,6 @@ jobs:
           pip install --upgrade pip
           pip install --upgrade -r requirements.txt
           pip install --upgrade pyinstaller
-      - name: Checkout code
-        uses: actions/checkout@v3
-        with:
-          submodules: recursive
       - name: Set up Python (Linux)
         if: matrix.os == 'linux'
         run: |
