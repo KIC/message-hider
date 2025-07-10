@@ -56,31 +56,28 @@ jobs:
           . .venv/bin/activate
           pip install --upgrade -r requirements.txt
           pip install --upgrade pyinstaller
-      - name: Set up Python (Linux)
+      - name: Build (Linux)
         if: matrix.os == 'linux'
         run: |
-          echo "Python virtual environment already set up in .venv."
-      - name: Set up Python (Windows)
+          pyinstaller src/app/${{ env.MAIN_PY_FILE }} --onefile --name hider --add-data "binaries/:binaries/"
+          # smoke test
+          ./dist/hider audio hide --secret "geheimnins" -o /tmp/ src/tests/data/short.mp3 
+          ./dist/hider audio reveil /tmp/short.mp3
+
+      - name: Build (Windows)
         if: matrix.os == 'windows-latest'
         run: |
-          echo "Python virtual environment already set up in .venv."
-      - name: Set up Python (macOS)
+          mkdir tmp
+          pyinstaller src/app/${{ env.MAIN_PY_FILE }} --onefile --name hider --add-data "binaries/:binaries/"
+          # smoke test
+          ./dist/hider.exe audio hide --secret "geheimnins" -o tmp/ src/tests/data/short.mp3 
+          ./dist/hider.exe audio reveil tmp/short.mp3
+
+      - name: Build (macOS)
         if: matrix.os == 'macos-latest'
         run: |
-          echo "Python virtual environment already set up in .venv."
-      # Build the executable using PyInstaller
-      - name: Build executable
-        run: |
-          echo "Building executable for ${{ matrix.os }}"
-          if [ "${{ matrix.os }}" = "linux" ]; then . .venv/bin/activate; fi
-          if [ "${{ matrix.os }}" = "macos-latest" ]; then . .venv/bin/activate; fi
-          if [ "${{ matrix.os }}" = "windows-latest" ]; then .\.venv\Scripts\activate; fi
           pyinstaller src/app/${{ env.MAIN_PY_FILE }} --onefile --name hider --add-data "binaries/:binaries/"
-
           # smoke test
-          if [ "${{ matrix.os }}" = "linux" ]; then . .venv/bin/activate; fi
-          if [ "${{ matrix.os }}" = "macos-latest" ]; then . .venv/bin/activate; fi
-          if [ "${{ matrix.os }}" = "windows-latest" ]; then .\.venv\Scripts\activate; fi
           ./dist/hider audio hide --secret "geheimnins" -o /tmp/ src/tests/data/short.mp3 
           ./dist/hider audio reveil /tmp/short.mp3
 
