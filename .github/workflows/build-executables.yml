@@ -14,6 +14,11 @@ jobs:
     env:
       MAIN_PY_FILE: "main.py"
     steps:
+      - name: Install GIT (Linux)
+        if: matrix.os == 'linux'
+        run: |
+          apt-get update
+          apt-get install -y git
       - name: Checkout code
         uses: actions/checkout@v3
         with:
