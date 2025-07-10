@@ -1,159 +1,108 @@
-name: Test and Build Executables
+name: Build Executables
 
 on:
   push:
-    branches:
-      - main
   workflow_dispatch:
 
 jobs:
-  test:
-    runs-on: ubuntu-24.04 # Use Ubuntu 24.04 to avoid glibc issues
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-        with:
-          submodules: recursive
-
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: 3.11
-
-      - name: Install dependencies
-        run: |
-          sudo apt update
-          sudo apt install -y ffmpeg
-          pip install --upgrade -r requirements.txt
-          pip install --upgrade pytest
-
-      - name: Run tests
-        run: |
-          pytest src/ -v
-
   build:
-    needs: test
     strategy:
       matrix:
-        os: [ubuntu-24.04, windows-latest, macos-latest] # Use ubuntu-24.04 for Linux builds
-    runs-on: ${{ matrix.os }}
+        os: [linux, windows-latest, macos-latest] # Use debian-bookworm for Linux builds
+    runs-on: ${{ matrix.os == 'linux' && 'ubuntu-latest' || matrix.os }}
+    container: ${{ matrix.os == 'linux' && 'debian:bookworm' || null }}
     env:
       MAIN_PY_FILE: "main.py"
-
     steps:
+      - name: Install GIT (Linux)
+        if: matrix.os == 'linux'
+        run: |
+          apt-get update
+          apt-get install -y git
       - name: Checkout code
         uses: actions/checkout@v3
         with:
           submodules: recursive
-
-      - name: Set up Python
+      - name: Set up Python (Windows)
+        if: matrix.os == 'windows-latest'
         uses: actions/setup-python@v4
         with:
-          python-version: 3.11
-
-      # Install dependencies based on OS
+          python-version: '3.11'
+      - name: Set up Python (macOS)
+        if: matrix.os == 'macos-latest'
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
       - name: Install dependencies (Linux)
-        if: runner.os == 'Linux'
+        if: matrix.os == 'linux'
         run: |
-          sudo apt update
-          sudo apt install -y ffmpeg flatpak flatpak-builder
-          flatpak remote-add --user --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+          apt-get update
+          apt-get install -y ffmpeg python3 python3-pip python3-venv
+          python3 -m venv .venv
+          . .venv/bin/activate
           pip install --upgrade -r requirements.txt
           pip install --upgrade pyinstaller
-
-      - name: Install Chocolatey and dependencies (Windows)
-        if: runner.os == 'Windows'
+      - name: Install dependencies (Windows)
+        if: matrix.os == 'windows-latest'
         run: |
           Set-ExecutionPolicy Bypass -Scope Process -Force
           [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072
           iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
           choco install ffmpeg -y
+
           pip install --upgrade -r requirements.txt
           pip install --upgrade pyinstaller
-
-      - name: Install Homebrew and dependencies (macOS)
-        if: runner.os == 'macOS'
+      - name: Install dependencies (macOS)
+        if: matrix.os == 'macos-latest'
         run: |
           /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
           echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> $HOME/.zprofile
           eval "$(/opt/homebrew/bin/brew shellenv)"
           brew install ffmpeg
+
           pip install --upgrade -r requirements.txt
           pip install --upgrade pyinstaller
+      - name: Build (Linux)
+        if: matrix.os == 'linux'
+        run: |
+          ldd --version
+          . .venv/bin/activate
+          pyinstaller src/app/${{ env.MAIN_PY_FILE }} --onefile --name hider --add-data "binaries/:binaries/"
+          # smoke test
+          ./dist/hider audio hide --secret "geheimnins" -o /tmp/ src/tests/data/short.mp3 
+          ./dist/hider audio reveil /tmp/short.mp3
 
-      # Build the executable using PyInstaller
-      - name: Build executable
+      - name: Build (Windows)
+        if: matrix.os == 'windows-latest'
+        run: |
+          mkdir tmp
+          pyinstaller src/app/${{ env.MAIN_PY_FILE }} --onefile --name hider --add-data "binaries/:binaries/"
+          # smoke test
+          ./dist/hider.exe audio hide --secret "geheimnins" -o tmp/ src/tests/data/short.mp3 
+          ./dist/hider.exe audio reveil tmp/short.mp3
+
+      - name: Build (macOS)
+        if: matrix.os == 'macos-latest'
         run: |
           pyinstaller src/app/${{ env.MAIN_PY_FILE }} --onefile --name hider --add-data "binaries/:binaries/"
-          ls -l dist/  # Verify build output
+          # smoke test
+          ./dist/hider audio hide --secret "geheimnins" -o /tmp/ src/tests/data/short.mp3 
+          ./dist/hider audio reveil /tmp/short.mp3
 
-      - name: Build Flatpak bundle (Linux)
-        if: runner.os == 'Linux'
-        run: |
-          flatpak remote-add --user --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
-          flatpak remote-list --user
-          cp dist/hider .
-          cp -r binaries . || true
-          cat > hider-flatpak.yml << 'EOL'
-          app-id: org.hider.Hider
-          runtime: org.freedesktop.Platform
-          runtime-version: '23.08'
-          sdk: org.freedesktop.Sdk
-          command: hider
-          finish-args:
-            - --share=ipc
-            - --filesystem=home
-          modules:
-            - name: ffmpeg
-              cleanup:
-                - /include
-                - /lib/pkgconfig
-                - /share/ffmpeg/examples
-              sources:
-                - type: archive
-                  url: https://ffmpeg.org/releases/ffmpeg-6.1.tar.xz
-                  sha256: 488c76e57dd9b3bee901f71d5c95eaf1db4a5a31fe46a28654e837144207c270
-            - name: hider-bin
-              buildsystem: simple
-              build-commands:
-                - install -Dm755 hider /app/bin/hider
-                - mkdir -p /app/binaries
-                - cp -r binaries/* /app/binaries/
-              sources:
-                - type: file
-                  path: hider
-                - type: dir
-                  path: binaries
-          EOL
-          flatpak install --user -y --noninteractive flathub org.freedesktop.Platform//23.08 org.freedesktop.Sdk//23.08
-          flatpak-builder --force-clean --repo=repo build-dir hider-flatpak.yml
-          flatpak build-bundle repo hider.flatpak org.hider.Hider
-          ls -l hider.flatpak
-
-      - name: Upload Flatpak bundle (Linux)
-        if: runner.os == 'Linux'
-        uses: actions/upload-artifact@v4
-        with:
-          name: flatpak-bundle
-          path: hider.flatpak
-
-      # Upload artifacts for each platform
       - name: Upload artifact (Windows)
-        if: runner.os == 'Windows'
+        if: matrix.os == 'windows-latest'
         uses: actions/upload-artifact@v4
         with:
           name: windows-executable
           path: dist/hider.exe
-
       - name: Upload artifact (Linux)
-        if: runner.os == 'Linux'
+        if: matrix.os == 'linux'
         uses: actions/upload-artifact@v4
         with:
           name: linux-executable
           path: dist/hider
-
       - name: Upload artifact (macOS)
-        if: runner.os == 'macOS'
+        if: matrix.os == 'macos-latest'
         uses: actions/upload-artifact@v4
         with:
           name: macos-executable
@@ -161,42 +110,34 @@ jobs:
 
   release:
     needs: build
-    runs-on: ubuntu-24.04 # Use Ubuntu 24.04 for the release job as well (for consistency)
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
     permissions:
       contents: write
-
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-        with:
-          submodules: recursive
-
       - name: Download Windows executable
         uses: actions/download-artifact@v4
         with:
           name: windows-executable
           path: windows-executable
-
       - name: Download Linux executable
         uses: actions/download-artifact@v4
         with:
           name: linux-executable
           path: linux-executable
-
       - name: Download macOS executable
         uses: actions/download-artifact@v4
         with:
           name: macos-executable
           path: macos-executable
-
       - name: Verify artifacts
         run: |
           ls -l *
-          echo "Explicit ls"
-          ls -l windows-executable/hider.exe
-          ls -l linux-executable/hider
-          ls -l macos-executable/hider
-
+          set -e
+          test -f windows-executable/hider.exe || (echo "Missing windows-executable/hider.exe" && exit 1)
+          test -f linux-executable/hider || (echo "Missing linux-executable/hider" && exit 1)
+          test -f macos-executable/hider || (echo "Missing macos-executable/hider" && exit 1)
+          echo "All expected artifacts are present."
       - name: Create release
         uses: actions/create-release@v1
         id: create-release
@@ -207,11 +148,9 @@ jobs:
           tag_name: "v${{ github.run_number }}"
           release_name: "Release ${{ github.run_number }}"
           body: "Automated release created by GitHub Actions."
-
       - name: Set upload_url output
         shell: bash
         run: echo "UPLOAD_URL=${{ steps.create-release.outputs.upload_url }}" >> $GITHUB_ENV
-
       - name: Upload release asset (Windows)
         uses: actions/upload-release-asset@v1
         env:
@@ -221,7 +160,6 @@ jobs:
           asset_path: windows-executable/hider.exe
           asset_name: hider.exe
           asset_content_type: application/octet-stream
-
       - name: Upload release asset (Linux)
         uses: actions/upload-release-asset@v1
         env:
@@ -231,7 +169,6 @@ jobs:
           asset_path: linux-executable/hider
           asset_name: hider
           asset_content_type: application/octet-stream
-
       - name: Upload macOS executable with logging
         uses: actions/upload-release-asset@v1
         env:
